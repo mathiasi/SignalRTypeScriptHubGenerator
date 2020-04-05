@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.SignalR;
 using Reinforced.Typings;
 using Reinforced.Typings.Ast;
 using Reinforced.Typings.Ast.TypeNames;
@@ -13,8 +14,14 @@ namespace SignalRTypeScriptHubGenerator
 {
     public static class SignalRTypeScriptHubGeneratorExtensions
     {
-        public static void GenerateSignalRTypeScriptHub(this ConfigurationBuilder builder, HubConnectionProviderReference hubConnectionProviderReference, Type serverType, Type frontendType, string namespaceFilter)
+        public static void GenerateSignalRTypeScriptHub<T>(this ConfigurationBuilder builder, HubConnectionProviderReference hubConnectionProviderReference, Hub<T> hub, string namespaceFilter) where T : class
         {
+
+            var serverType = hub.GetType();
+            var frontendType = hub.GetType().BaseType.GetGenericArguments()[0];
+
+            builder.Global(c => c.UseModules());
+
             builder.AddImport("{ Injectable }", "@angular/core");
             builder.AddImport("{ HubConnection }", "@microsoft/signalr");
             builder.AddImport("* as signalR", "@microsoft/signalr");
