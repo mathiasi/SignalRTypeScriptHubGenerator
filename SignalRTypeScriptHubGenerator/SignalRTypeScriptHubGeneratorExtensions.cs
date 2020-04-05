@@ -3,9 +3,9 @@ using System.Threading.Tasks;
 using Reinforced.Typings.Ast.TypeNames;
 using Reinforced.Typings.Fluent;
 
-namespace SignalRTypeScriptGenerator
+namespace SignalRTypeScriptHubGenerator
 {
-    public static class SignalRTypeScriptGeneratorExtensions
+    public static class SignalRTypeScriptHubGeneratorExtensions
     {
         public static void GenerateSignalRTypeScript(this ConfigurationBuilder builder)
         {
