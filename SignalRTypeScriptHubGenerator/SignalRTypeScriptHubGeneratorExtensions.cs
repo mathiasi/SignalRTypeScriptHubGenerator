@@ -13,9 +13,8 @@ namespace SignalRTypeScriptHubGenerator
 {
     public static class SignalRTypeScriptHubGeneratorExtensions
     {
-        public static void GenerateSignalRTypeScriptHub(this ConfigurationBuilder builder, HubConnectionProviderReference hubConnectionProviderReference, Type hub, string namespaceFilter)
+        public static void GenerateSignalRTypeScriptHub(this ConfigurationBuilder builder, HubConnectionProviderReference hubConnectionProviderReference, Type hub, string hubPattern, string namespaceFilter)
         {
-
             var serverType = hub;
             var frontendType = hub.BaseType.GetGenericArguments()[0];
 
@@ -23,7 +22,6 @@ namespace SignalRTypeScriptHubGenerator
 
             builder.AddImport("{ Injectable }", "@angular/core");
             builder.AddImport("{ HubConnection }", "@microsoft/signalr");
-            builder.AddImport("* as signalR", "@microsoft/signalr");
             builder.AddImport("{ SignalDispatcher, SimpleEventDispatcher }", "strongly-typed-events");
             builder.AddImport(hubConnectionProviderReference.Target, hubConnectionProviderReference.From);
 
@@ -38,7 +36,7 @@ namespace SignalRTypeScriptHubGenerator
 
             builder.ExportAsInterfaces(relatedTypes, c => c.WithAllProperties().WithAllFields().WithAllMethods());
             builder.ExportAsInterfaces(new[] {serverType}, c => c.WithAllProperties().WithAllFields().WithAllMethods().WithCodeGenerator<ServerClientAppender>());
-            builder.ExportAsInterfaces(new []{frontendType}, c => c.WithAllProperties().WithAllFields().WithAllMethods().WithCodeGenerator<FrontEndClientAppender>());
+            builder.ExportAsInterfaces(new[] {frontendType}, c => c.WithAllProperties().WithAllFields().WithAllMethods().WithCodeGenerator<FrontEndClientAppender>());
         }
 
         public static IEnumerable<Type> TraverseTypes(Type type, string namespaceFilter)
@@ -122,7 +120,7 @@ namespace SignalRTypeScriptHubGenerator
         {
             var clientImpl = new RtClass()
             {
-                Name = new RtSimpleTypeName($"{element.Name.Substring(1)}Client"),
+                Name = new RtSimpleTypeName($"{element.Name}Client"),
                 Export = true,
                 Decorators = { new RtDecorator("Injectable()\r\n") },
                 Implementees = { result.Name },
@@ -169,7 +167,7 @@ namespace SignalRTypeScriptHubGenerator
         {
             var clientImpl = new RtClass()
             {
-                Name = new RtSimpleTypeName($"{element.Name.Substring(1)}Client"),
+                Name = new RtSimpleTypeName($"{element.Name}Client"),
                 Export = true,
                 Decorators = { new RtDecorator("Injectable()\r\n") },
 
@@ -195,7 +193,7 @@ namespace SignalRTypeScriptHubGenerator
                 var eventDispatcher = new RtField
                 {
                     AccessModifier = AccessModifier.Public,
-                    Identifier = new RtIdentifier($"on{function.Identifier}"),
+                    Identifier = new RtIdentifier($"on{function.Identifier.ToString().FirstCharToUpper()}"),
                     Type = new RtSimpleTypeName(stringType),
                     InitializationExpression = $"new {stringType}()"
                 };
@@ -228,7 +226,7 @@ namespace SignalRTypeScriptHubGenerator
                 {
                     commaArgs = $"[{commaArgs}]";
                 }
-                return $"hubConnection.on(\"{f.Identifier}\", {response} => {{\r\n      console.log(\"{f.Identifier} received from server\", {commaArgs});\r\n      this.on{f.Identifier}.dispatch({commaArgs});\r\n    }});";
+                return $"hubConnection.on(\"{f.Identifier}\", {response} => {{\r\n      console.log(\"{f.Identifier} received from server\", {commaArgs});\r\n      this.on{f.Identifier.ToString().FirstCharToUpper()}.dispatch({commaArgs});\r\n    }});";
             });
             return new RtRaw(pre + string.Join("\r\n", e));
         }
