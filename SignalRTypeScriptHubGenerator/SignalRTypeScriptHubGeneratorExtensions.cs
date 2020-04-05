@@ -24,8 +24,15 @@ namespace SignalRTypeScriptHubGenerator
             builder.Substitute(typeof(Task), new RtSimpleTypeName("Promise<void>"));
             builder.Substitute(typeof(Task<>), new RtSimpleTypeName("Promise"));
 
-            builder.ExportAsInterfaces(TraverseTypes(serverType, namespaceFilter), c => c.WithAllProperties().WithAllFields().WithAllMethods().WithCodeGenerator<ServerClientAppender>());
-            builder.ExportAsInterfaces(TraverseTypes(frontendType, namespaceFilter), c => c.WithAllProperties().WithAllFields().WithAllMethods().WithCodeGenerator<FrontEndClientAppender>());
+            var relatedTypes = new HashSet<Type>();
+            relatedTypes.UnionWith(TraverseTypes(serverType, namespaceFilter));
+            relatedTypes.UnionWith(TraverseTypes(frontendType, namespaceFilter));
+            relatedTypes.Remove(serverType);
+            relatedTypes.Remove(frontendType);
+
+            builder.ExportAsInterfaces(relatedTypes, c => c.WithAllProperties().WithAllFields().WithAllMethods());
+            builder.ExportAsInterfaces(new[] {serverType}, c => c.WithAllProperties().WithAllFields().WithAllMethods().WithCodeGenerator<ServerClientAppender>());
+            builder.ExportAsInterfaces(new []{frontendType}, c => c.WithAllProperties().WithAllFields().WithAllMethods().WithCodeGenerator<FrontEndClientAppender>());
         }
 
         public static IEnumerable<Type> TraverseTypes(Type type, string namespaceFilter)
