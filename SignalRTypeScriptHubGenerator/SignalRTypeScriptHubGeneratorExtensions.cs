@@ -14,11 +14,11 @@ namespace SignalRTypeScriptHubGenerator
 {
     public static class SignalRTypeScriptHubGeneratorExtensions
     {
-        public static void GenerateSignalRTypeScriptHub<T>(this ConfigurationBuilder builder, HubConnectionProviderReference hubConnectionProviderReference, Hub<T> hub, string namespaceFilter) where T : class
+        public static void GenerateSignalRTypeScriptHub(this ConfigurationBuilder builder, HubConnectionProviderReference hubConnectionProviderReference, Type hub, string namespaceFilter)
         {
 
-            var serverType = hub.GetType();
-            var frontendType = hub.GetType().BaseType.GetGenericArguments()[0];
+            var serverType = hub;
+            var frontendType = hub.BaseType.GetGenericArguments()[0];
 
             builder.Global(c => c.UseModules());
 
