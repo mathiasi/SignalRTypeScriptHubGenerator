@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using System.Threading.Tasks;
-using Microsoft.AspNetCore.SignalR;
 using Reinforced.Typings;
 using Reinforced.Typings.Ast;
 using Reinforced.Typings.Ast.TypeNames;
