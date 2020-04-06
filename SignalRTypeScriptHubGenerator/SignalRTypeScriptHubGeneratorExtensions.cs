@@ -34,9 +34,9 @@ namespace SignalRTypeScriptHubGenerator
             relatedTypes.Remove(serverType);
             relatedTypes.Remove(frontendType);
 
-            builder.ExportAsInterfaces(relatedTypes, c => c.WithAllProperties().WithAllFields().WithAllMethods());
-            builder.ExportAsInterfaces(new[] {serverType}, c => c.WithAllProperties().WithAllFields().WithAllMethods().WithCodeGenerator<ServerClientAppender>());
-            builder.ExportAsInterfaces(new[] {frontendType}, c => c.WithAllProperties().WithAllFields().WithAllMethods().WithCodeGenerator<FrontEndClientAppender>());
+            builder.ExportAsInterfaces(relatedTypes, c => c.WithPublicProperties().WithPublicFields().WithPublicMethods());
+            builder.ExportAsInterfaces(new[] {serverType}, c => c.WithPublicProperties().WithPublicFields().WithPublicMethods().WithCodeGenerator<ServerClientAppender>());
+            builder.ExportAsInterfaces(new[] {frontendType}, c => c.WithPublicProperties().WithPublicFields().WithPublicMethods().WithCodeGenerator<FrontEndClientAppender>());
         }
 
         public static IEnumerable<Type> TraverseTypes(Type type, string namespaceFilter)
