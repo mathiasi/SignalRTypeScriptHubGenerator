@@ -34,7 +34,11 @@ namespace SignalRTypeScriptHubGenerator
             relatedTypes.Remove(serverType);
             relatedTypes.Remove(frontendType);
 
-            builder.ExportAsInterfaces(relatedTypes, c => c.WithPublicProperties().WithPublicFields().WithPublicMethods());
+            var relatedClassTypes = relatedTypes.Where(t => t.IsClass);
+            var otherTypes = relatedTypes.Where(t => !t.IsClass);
+
+            builder.ExportAsClasses(relatedClassTypes, c => c.WithPublicProperties().WithPublicFields().WithPublicMethods());
+            builder.ExportAsInterfaces(otherTypes, c => c.WithPublicProperties().WithPublicFields().WithPublicMethods());
             builder.ExportAsInterfaces(new[] {serverType}, c => c.WithPublicProperties().WithPublicFields().WithPublicMethods().WithCodeGenerator<ServerClientAppender>());
             builder.ExportAsInterfaces(new[] {frontendType}, c => c.WithPublicProperties().WithPublicFields().WithPublicMethods().WithCodeGenerator<FrontEndClientAppender>());
         }
