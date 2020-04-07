@@ -27,6 +27,8 @@ namespace SignalRTypeScriptHubGenerator
 
             builder.Substitute(typeof(Task), new RtSimpleTypeName("Promise<void>"));
             builder.Substitute(typeof(Task<>), new RtSimpleTypeName("Promise"));
+            builder.Substitute(typeof(DateTime), new RtSimpleTypeName("Date"));
+            builder.Substitute(typeof(Uri), new RtSimpleTypeName("string"));
 
             var relatedTypes = new HashSet<Type>();
             relatedTypes.UnionWith(TraverseTypes(serverType, namespaceFilter));
