@@ -133,7 +133,12 @@ namespace SignalRTypeScriptHubGenerator
 
             ClientAppenderImpl(element, result, resolver);
 
-            return existing;
+            return ReturnExisting() ? existing : null;
+        }
+
+        protected virtual bool ReturnExisting()
+        {
+            return true;
         }
 
         protected abstract void ClientAppenderImpl(Type element, RtInterface result, TypeResolver resolver);
@@ -188,11 +193,17 @@ namespace SignalRTypeScriptHubGenerator
 
     internal class FrontEndClientAppender : ClientAppenderBase
     {
+        protected override bool ReturnExisting()
+        {
+            return false;
+        }
+
         protected override void ClientAppenderImpl(Type element, RtInterface result, TypeResolver resolver)
         {
-            var clientImpl = new RtClass()
+            var typeName = element.IsInterface && element.Name.StartsWith('I') ? element.Name.Substring(1) : element.Name;
+            var clientImpl = new RtClass
             {
-                Name = new RtSimpleTypeName($"{element.Name}Client"),
+                Name = new RtSimpleTypeName(typeName),
                 Export = true,
                 Decorators = { new RtDecorator("Injectable()\r\n") },
 
