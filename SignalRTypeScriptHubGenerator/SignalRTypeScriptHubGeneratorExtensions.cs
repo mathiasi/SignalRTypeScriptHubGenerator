@@ -37,21 +37,40 @@ namespace SignalRTypeScriptHubGenerator
             var relatedClassTypes = relatedTypes.Where(t => t.IsClass);
             var otherTypes = relatedTypes.Where(t => !t.IsClass);
 
-            builder.ExportAsClasses(relatedClassTypes, c => c.WithPublicProperties().WithPublicFields().WithPublicMethods());
-            builder.ExportAsInterfaces(otherTypes, c => c.WithPublicProperties().WithPublicFields().WithPublicMethods());
+            Func<Type, int> orderFunc = relatedTypes.SelectMany(t => EnumerateHierarchy(t, e => e.BaseType).Reverse()).ToList().IndexOf;
+
+            builder.ExportAsClasses(relatedClassTypes, c => c.WithPublicProperties().WithPublicFields().WithPublicMethods().Order(orderFunc(c.Type)));
+            builder.ExportAsInterfaces(otherTypes, c => c.WithPublicProperties().WithPublicFields().WithPublicMethods().Order(orderFunc(c.Type)));
             builder.ExportAsInterfaces(new[] {serverType}, c => c.WithPublicProperties().WithPublicFields().WithPublicMethods().WithCodeGenerator<ServerClientAppender>());
             builder.ExportAsInterfaces(new[] {frontendType}, c => c.WithPublicProperties().WithPublicFields().WithPublicMethods().WithCodeGenerator<FrontEndClientAppender>());
+        }
+
+        public static IEnumerable<T> EnumerateHierarchy<T>(T item, Func<T, T> selector) where T : class
+        {
+            do
+            {
+                yield return item;
+                item = selector(item);
+            }
+            while (item != default(T));
         }
 
         public static IEnumerable<Type> TraverseTypes(Type type, string namespaceFilter)
         {
             var types = new HashSet<Type>();
+            types.UnionWith(type.GetInterfaces());
+            types.UnionWith(GetBaseClassIfAny(type));
             types.UnionWith(TraverseMethods(type));
             types.UnionWith(TraverseProperties(type));
             types.IntersectWith(types.Where(t => t.Namespace != null && t.Namespace.StartsWith(namespaceFilter)));
             types.UnionWith(types.ToList().SelectMany(t => TraverseTypes(t, namespaceFilter)));
             types.Add(type);
             return types;
+        }
+
+        private static IEnumerable<Type> GetBaseClassIfAny(Type type)
+        {
+            return type.BaseType == null ? new Type[0] : new[] { type.BaseType };
         }
 
         private static IEnumerable<Type> TraverseProperties(Type type)
