@@ -45,7 +45,7 @@ namespace SignalRTypeScriptHubGenerator
             builder.ExportAsInterfaces(new[] {frontendType}, c => c.WithPublicProperties().WithPublicFields().WithPublicMethods().WithCodeGenerator<FrontEndClientAppender>());
         }
 
-        public static IEnumerable<T> EnumerateHierarchy<T>(T item, Func<T, T> selector) where T : class
+        private static IEnumerable<T> EnumerateHierarchy<T>(T item, Func<T, T> selector) where T : class
         {
             do
             {
@@ -55,7 +55,7 @@ namespace SignalRTypeScriptHubGenerator
             while (item != default(T));
         }
 
-        public static IEnumerable<Type> TraverseTypes(Type type, string namespaceFilter)
+        private static IEnumerable<Type> TraverseTypes(Type type, string namespaceFilter)
         {
             var types = new HashSet<Type>();
             types.UnionWith(type.GetInterfaces());

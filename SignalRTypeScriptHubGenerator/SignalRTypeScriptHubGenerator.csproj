@@ -2,7 +2,7 @@
 
   <PropertyGroup>
     <TargetFramework>netcoreapp3.1</TargetFramework>
-    <Version>0.0.11</Version>
+    <Version>1.0.11</Version>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
     <PackageProjectUrl>https://github.com/mathiasi/SignalRTypeScriptHubGenerator</PackageProjectUrl>
     <RepositoryUrl>https://github.com/mathiasi/SignalRTypeScriptHubGenerator</RepositoryUrl>
@@ -10,6 +10,7 @@
     <RepositoryType>git</RepositoryType>
     <Authors>Mathias Immerkær</Authors>
     <Description>Generates TypeScript hub client for SignalR.</Description>
+    <PackageTags>signalr typescript generator</PackageTags>
   </PropertyGroup>
 
   <ItemGroup>
