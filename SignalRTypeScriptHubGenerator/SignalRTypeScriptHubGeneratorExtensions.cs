@@ -134,7 +134,7 @@ namespace SignalRTypeScriptHubGenerator
                     {
                         AccessModifier = AccessModifier.Private,
                         Identifier = new RtIdentifier("hubConnection"),
-                        Type = new RtSimpleTypeName("HubConnection")
+                        Type = new RtSimpleTypeName("Promise<HubConnection>")
                     },
                     new RtConstructor
                     {
@@ -143,7 +143,7 @@ namespace SignalRTypeScriptHubGenerator
                             Type = new RtSimpleTypeName("HubConnectionProvider"),
                             Identifier = new RtIdentifier("hubConnectionProvider")
                         }},
-                        Body = new RtRaw("this.hubConnection = hubConnectionProvider.getHubConnection();"),
+                        Body = new RtRaw("this.hubConnection = hubConnectionProvider.getHubConnection(\"/hub\");"),
                     }
                 },
             };
@@ -158,7 +158,7 @@ namespace SignalRTypeScriptHubGenerator
             foreach (var function in functions)
             {
                 var arguments = function.Arguments.Select(a => a.Identifier.ToString());
-                function.Body = new RtRaw($"return this.hubConnection.invoke(\"{function.Identifier.IdentifierName}\",{string.Join(",", arguments)});");
+                function.Body = new RtRaw($"return this.hubConnection.then(hub => hub.invoke(\"{function.Identifier.IdentifierName}\",{string.Join(",", arguments)}));");
             }
 
             return functions;
@@ -204,7 +204,7 @@ namespace SignalRTypeScriptHubGenerator
                 members.Add(eventDispatcher);
             }
 
-            var cstr = new RtConstructor
+            members.Add(new RtConstructor
             {
                 Arguments = { new RtArgument
                 {
@@ -212,15 +212,14 @@ namespace SignalRTypeScriptHubGenerator
                     Identifier = new RtIdentifier("hubConnectionProvider")
                 }},
                 Body = GetEventRegistrationBody(functions)
-            };
-            members.Add(cstr);
+            });
 
             return members;
         }
 
         private RtRaw GetEventRegistrationBody(IEnumerable<RtFuncion> functions)
         {
-            var pre = "var hubConnection = hubConnectionProvider.getHubConnection();\r\n";
+            var pre = "hubConnectionProvider.getHubConnection(\"/hub\").then(hubConnection => {\r\n";
             var e = functions.Select(f =>
             {
                 var args = f.Arguments.Select(a => $"{a.Identifier} : {a.Type}").ToList();
@@ -230,9 +229,10 @@ namespace SignalRTypeScriptHubGenerator
                 {
                     commaArgs = $"[{commaArgs}]";
                 }
-                return $"hubConnection.on(\"{f.Identifier}\", {response} => {{\r\n      console.log(\"{f.Identifier} received from server\", {commaArgs});\r\n      this.on{f.Identifier.ToString().FirstCharToUpper()}.dispatch({commaArgs});\r\n    }});";
+                return $"  hubConnection.on(\"{f.Identifier}\", {response} => {{\r\n      console.log(\"{f.Identifier} received from server\", {commaArgs});\r\n      this.on{f.Identifier.ToString().FirstCharToUpper()}.dispatch({commaArgs});\r\n    }});";
             });
-            return new RtRaw(pre + string.Join("\r\n", e));
+            var post = "\r\n});";
+            return new RtRaw(pre + string.Join("\r\n", e) + post);
         }
     }
 }
