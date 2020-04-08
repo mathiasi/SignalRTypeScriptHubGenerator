@@ -37,10 +37,12 @@ namespace SignalRTypeScriptHubGenerator
             relatedTypes.Remove(frontendType);
 
             var relatedClassTypes = relatedTypes.Where(t => t.IsClass);
-            var otherTypes = relatedTypes.Where(t => !t.IsClass);
+            var relatedEnumTypes = relatedTypes.Where(t => t.IsEnum);
+            var otherTypes = relatedTypes.Where(t => !(t.IsClass || t.IsEnum));
 
             Func<Type, int> orderFunc = relatedTypes.SelectMany(t => EnumerateHierarchy(t, e => e.BaseType).Reverse()).ToList().IndexOf;
 
+            builder.ExportAsEnums(relatedEnumTypes, c => c.Order(orderFunc(c.Type)));
             builder.ExportAsClasses(relatedClassTypes, c => c.WithPublicProperties().WithPublicFields().WithPublicMethods().Order(orderFunc(c.Type)));
             builder.ExportAsInterfaces(otherTypes, c => c.WithPublicProperties().WithPublicFields().WithPublicMethods().Order(orderFunc(c.Type)));
             builder.ExportAsInterfaces(new[] {serverType}, c => c.WithPublicProperties().WithPublicFields().WithPublicMethods().WithCodeGenerator<ServerClientAppender>());
