@@ -59,15 +59,21 @@ namespace SignalRTypeScriptHubGenerator
             while (item != default(T));
         }
 
-        private static IEnumerable<Type> TraverseTypes(Type type, string namespaceFilter)
+        public static IEnumerable<Type> TraverseTypes(Type type, string namespaceFilter)
         {
+            return TraverseTypes(type, namespaceFilter, new List<Type>());
+        }
+
+        public static IEnumerable<Type> TraverseTypes(Type type, string namespaceFilter, List<Type> visited)
+        {
+            visited.Add(type);
             var types = new HashSet<Type>();
             types.UnionWith(type.GetInterfaces());
             types.UnionWith(GetBaseClassIfAny(type));
             types.UnionWith(TraverseMethods(type));
             types.UnionWith(TraverseProperties(type));
+            types.UnionWith(types.ToList().SelectMany(t => visited.Contains(t) ? new List<Type>() : TraverseTypes(t, namespaceFilter, visited)));
             types.IntersectWith(types.Where(t => t.Namespace != null && t.Namespace.StartsWith(namespaceFilter)));
-            types.UnionWith(types.ToList().SelectMany(t => TraverseTypes(t, namespaceFilter)));
             types.Add(type);
             return types;
         }
