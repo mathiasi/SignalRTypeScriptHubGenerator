@@ -44,6 +44,18 @@ namespace SignalRTypeScriptHubGenerator.Test
 
             CollectionAssert.AreEquivalent(expectedTypes, new List<Type>(types));
         }
+
+        [TestMethod]
+        public void GIVEN_ArrayType_WHEN_TraverseTypes_THEN_OnlyBaseIncluded()
+        {
+            var targetType = typeof(ITestInterface4);
+            var namespaceFilter = "SignalRTypeScriptHubGenerator";
+            var expectedTypes = new[] { targetType, typeof(MyClass) };
+
+            var types = SignalRTypeScriptHubGeneratorExtensions.TraverseTypes(targetType, namespaceFilter);
+
+            CollectionAssert.AreEquivalent(expectedTypes, new List<Type>(types));
+        }
     }
 
     interface ITestInterface
@@ -75,5 +87,10 @@ namespace SignalRTypeScriptHubGenerator.Test
     interface ITestInterface3
     {
         void Foo(ref MyClass myClass);
+    }
+
+    interface ITestInterface4
+    {
+        void Foo(MyClass[] myClass);
     }
 }
