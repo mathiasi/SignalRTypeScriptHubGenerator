@@ -74,6 +74,7 @@ namespace SignalRTypeScriptHubGenerator
             types.UnionWith(TraverseProperties(type));
             types.UnionWith(types.ToList().SelectMany(t => visited.Contains(t) ? new List<Type>() : TraverseTypes(t, namespaceFilter, visited)));
             types.IntersectWith(types.Where(t => t.Namespace != null && t.Namespace.StartsWith(namespaceFilter)));
+            types.ExceptWith(types.ToList().Where(t => t.IsByRef));
             types.Add(type);
             return types;
         }

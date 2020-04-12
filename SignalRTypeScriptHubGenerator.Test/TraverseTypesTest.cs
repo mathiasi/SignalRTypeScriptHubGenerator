@@ -10,7 +10,7 @@ namespace SignalRTypeScriptHubGenerator.Test
     public class TraverseTypesTest
     {
         [TestMethod]
-        public void GIVEN_TypesThatAreSeparatedOutsideNamespaceFilter_WHEN_TraverseTypes_AllFound()
+        public void GIVEN_TypesThatAreSeparatedOutsideNamespaceFilter_WHEN_TraverseTypes_THEN_AllFound()
         {
             var targetType = typeof(ITestInterface);
             var namespaceFilter = "SignalRTypeScriptHubGenerator";
@@ -22,11 +22,23 @@ namespace SignalRTypeScriptHubGenerator.Test
         }
 
         [TestMethod]
-        public void GIVEN_ThereAreNestedGenericTypesWithDifferentTypes_WHEN_TraverseTypes_AllFound()
+        public void GIVEN_ThereAreNestedGenericTypesWithDifferentTypes_WHEN_TraverseTypes_THEN_AllFound()
         {
             var targetType = typeof(ITestInterface2);
             var namespaceFilter = "SignalRTypeScriptHubGenerator";
             var expectedTypes = new[] { targetType, typeof(MyClass), typeof(MyClass2), typeof(MyGenericClass<MyClass>), typeof(MyGenericClass<MyClass2>) };
+
+            var types = SignalRTypeScriptHubGeneratorExtensions.TraverseTypes(targetType, namespaceFilter);
+
+            CollectionAssert.AreEquivalent(expectedTypes, new List<Type>(types));
+        }
+
+        [TestMethod]
+        public void GIVEN_ReferenceType_WHEN_TraverseTypes_THEN_Ignored()
+        {
+            var targetType = typeof(ITestInterface3);
+            var namespaceFilter = "SignalRTypeScriptHubGenerator";
+            var expectedTypes = new[] { targetType };
 
             var types = SignalRTypeScriptHubGeneratorExtensions.TraverseTypes(targetType, namespaceFilter);
 
@@ -58,5 +70,10 @@ namespace SignalRTypeScriptHubGenerator.Test
     class MyGenericClass<T>
     {
 
+    }
+
+    interface ITestInterface3
+    {
+        void Foo(ref MyClass myClass);
     }
 }
